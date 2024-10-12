@@ -11,20 +11,12 @@
 
 include "mlir/Pass/PassBase.td"
 
-def QBESwitchBarFoo: Pass<"qbe-switch-bar-foo", "::mlir::ModuleOp"> {
-  let summary = "Switches the name of a FuncOp named `bar` to `foo` and folds.";
+def ConvertArithToQBE: Pass<"convert-arith-to-qbe"> {
+  let summary = "Convert Arith dialect to QBE dialect";
   let description = [{
-    Switches the name of a FuncOp named `bar` to `foo` and folds.
-    ```
-    func.func @bar() {
-      return
-    }
-    // Gets transformed to:
-    func.func @foo() {
-      return
-    }
-    ```
+    This pass converts supported Arith ops to QBE ops.
   }];
+  let dependentDialects = ["arith::ArithDialect", "qbe::QBEDialect"];
 }
 
 #endif // QBE_PASS

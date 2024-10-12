@@ -5,42 +5,56 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/IR/PatternMatch.h"
-#include "mlir/Rewrite/FrozenRewritePatternSet.h"
-#include "mlir/Support/LogicalResult.h"
-#include "mlir/Transforms/GreedyPatternRewriteDriver.h"
 
 #include "QBE/QBEPasses.h"
+#include "QBE/QBEDialect.h"
+#include "QBE/QBEOps.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/IR/BuiltinDialect.h"
+#include "mlir/IR/BuiltinOps.h"
+#include "mlir/IR/PatternMatch.h"
+#include "mlir/Support/LogicalResult.h"
+#include "mlir/Transforms/DialectConversion.h"
 
 namespace mlir::qbe {
-#define GEN_PASS_DEF_QBESWITCHBARFOO
+#define GEN_PASS_DEF_CONVERTARITHTOQBE
 #include "QBE/QBEPasses.h.inc"
 
 namespace {
-class QBESwitchBarFooRewriter : public OpRewritePattern<func::FuncOp> {
-public:
-  using OpRewritePattern<func::FuncOp>::OpRewritePattern;
-  LogicalResult matchAndRewrite(func::FuncOp op,
-                                PatternRewriter &rewriter) const final {
-    if (op.getSymName() == "bar") {
-      rewriter.modifyOpInPlace(op, [&op]() { op.setSymName("foo"); });
-      return success();
-    }
-    return failure();
-  }
-};
+struct AddIConversionPattern : public OpConversionPattern<arith::AddIOp> {
+  using OpConversionPattern::OpConversionPattern;
 
-class QBESwitchBarFoo : public impl::QBESwitchBarFooBase<QBESwitchBarFoo> {
-public:
-  using impl::QBESwitchBarFooBase<QBESwitchBarFoo>::QBESwitchBarFooBase;
-  void runOnOperation() final {
-    RewritePatternSet patterns(&getContext());
-    patterns.add<QBESwitchBarFooRewriter>(&getContext());
-    FrozenRewritePatternSet patternSet(std::move(patterns));
-    if (failed(applyPatternsAndFoldGreedily(getOperation(), patternSet)))
-      signalPassFailure();
+  LogicalResult
+  matchAndRewrite(arith::AddIOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    rewriter.replaceOpWithNewOp<qbe::AddOp>(op, adaptor.getOperands());
+    return success();
   }
 };
 } // namespace
+
+struct ConvertArithToQBE
+    : public impl::ConvertArithToQBEBase<ConvertArithToQBE> {
+  using Base::Base;
+
+  void runOnOperation() final {
+    RewritePatternSet patterns(&getContext());
+    QBETypeConverter converter(&getContext());
+    populateArithToQBEConversionPatterns(converter, patterns);
+    ConversionTarget target(getContext());
+    target.addIllegalDialect<arith::ArithDialect>();
+    target.addLegalDialect<qbe::QBEDialect>();
+    target.addLegalOp<UnrealizedConversionCastOp>();
+    if (failed(applyPartialConversion(getOperation(), target,
+                                      std::move(patterns)))) {
+      signalPassFailure();
+    }
+  }
+};
+
+void populateArithToQBEConversionPatterns(QBETypeConverter &converter,
+                                          RewritePatternSet &patterns) {
+  patterns.add<AddIConversionPattern>(converter, patterns.getContext());
+}
+
 } // namespace mlir::qbe

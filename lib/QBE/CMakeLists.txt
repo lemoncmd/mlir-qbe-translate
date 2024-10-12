@@ -14,5 +14,10 @@ add_mlir_dialect_library(MLIRQBEDialect
         LINK_LIBS PUBLIC
         MLIRIR
         MLIRInferTypeOpInterface
+        MLIRArithDialect
+        MLIRControlFlowDialect
         MLIRFuncDialect
+        MLIRIndexDialect
+        MLIRMathDialect
+        MLIRMemRefDialect
         )

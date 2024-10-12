@@ -10,7 +10,11 @@
 
 #include "QBE/QBEDialect.h"
 #include "QBE/QBEOps.h"
+#include "QBE/QBETypes.h"
+#include "mlir/IR/BuiltinTypes.h"
+#include "mlir/IR/PatternMatch.h"
 #include "mlir/Pass/Pass.h"
+#include "mlir/Transforms/DialectConversion.h"
 #include <memory>
 
 namespace mlir {
@@ -20,6 +24,56 @@ namespace qbe {
 
 #define GEN_PASS_REGISTRATION
 #include "QBE/QBEPasses.h.inc"
+
+class QBETypeConverter : public TypeConverter {
+public:
+  QBETypeConverter(MLIRContext *ctx) {
+    addConversion([](Type type) { return type; });
+    addConversion([ctx](IntegerType type) -> Type {
+      switch (type.getWidth()) {
+      case 32: {
+        return QBEWordType::get(ctx);
+      } break;
+      case 64: {
+        return QBELongType::get(ctx);
+      } break;
+      }
+      return type;
+    });
+    addConversion([ctx](FloatType type) -> Type {
+      switch (type.getWidth()) {
+      case 32: {
+        return QBESingleType::get(ctx);
+      } break;
+      case 64: {
+        return QBEDoubleType::get(ctx);
+      } break;
+      }
+      return type;
+    });
+    addSourceMaterialization([&](OpBuilder &builder, Type resultType,
+                                 ValueRange inputs,
+                                 Location loc) -> std::optional<Value> {
+      if (inputs.size() != 1)
+        return std::nullopt;
+
+      return builder.create<UnrealizedConversionCastOp>(loc, resultType, inputs)
+          .getResult(0);
+    });
+    addTargetMaterialization([&](OpBuilder &builder, Type resultType,
+                                 ValueRange inputs,
+                                 Location loc) -> std::optional<Value> {
+      if (inputs.size() != 1)
+        return std::nullopt;
+
+      return builder.create<UnrealizedConversionCastOp>(loc, resultType, inputs)
+          .getResult(0);
+    });
+  }
+};
+
+void populateArithToQBEConversionPatterns(QBETypeConverter &converter,
+                                          RewritePatternSet &patterns);
 } // namespace qbe
 } // namespace mlir
 

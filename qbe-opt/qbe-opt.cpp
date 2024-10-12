@@ -22,7 +22,6 @@
 int main(int argc, char **argv) {
   mlir::registerAllPasses();
   mlir::qbe::registerPasses();
-  // TODO: Register qbe passes here.
 
   mlir::DialectRegistry registry;
   registry.insert<mlir::qbe::QBEDialect, mlir::arith::ArithDialect,
