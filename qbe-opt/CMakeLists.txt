@@ -4,8 +4,13 @@ set(LIBS
         ${dialect_libs}
         ${conversion_libs}
         MLIRArithDialect
+        MLIRControlFlowDialect
+        MLIRFuncDialect
+        MLIRIndexDialect
+        MLIRMathDialect
+        MLIRMemRefDialect
         MLIROptLib
-        MLIRQBE
+        MLIRQBEDialect
         )
 add_llvm_executable(qbe-opt qbe-opt.cpp)
 

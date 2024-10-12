@@ -1,4 +1,4 @@
-add_mlir_dialect_library(MLIRQBE
+add_mlir_dialect_library(MLIRQBEDialect
         QBETypes.cpp
         QBEDialect.cpp
         QBEOps.cpp

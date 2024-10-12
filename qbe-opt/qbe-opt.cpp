@@ -6,6 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
+#include "mlir/Dialect/Index/IR/IndexDialect.h"
+#include "mlir/Dialect/Math/IR/Math.h"
+#include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/InitAllDialects.h"
 #include "mlir/InitAllPasses.h"
@@ -22,11 +26,9 @@ int main(int argc, char **argv) {
 
   mlir::DialectRegistry registry;
   registry.insert<mlir::qbe::QBEDialect, mlir::arith::ArithDialect,
-                  mlir::func::FuncDialect>();
-  // Add the following to include *all* MLIR Core dialects, or selectively
-  // include what you need like above. You only need to register dialects that
-  // will be *parsed* by the tool, not the one generated
-  // registerAllDialects(registry);
+                  mlir::cf::ControlFlowDialect, mlir::func::FuncDialect,
+                  mlir::index::IndexDialect, mlir::math::MathDialect,
+                  mlir::memref::MemRefDialect>();
 
   return mlir::asMainReturnCode(
       mlir::MlirOptMain(argc, argv, "QBE optimizer driver\n", registry));
