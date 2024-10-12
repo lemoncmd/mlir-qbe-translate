@@ -1,4 +1,4 @@
-//===- QBEOps.td - QBE dialect ops -----------*- tablegen -*-===//
+//===- QBEOps.td - QBE dialect ops -------------------------*- tablegen -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -13,30 +13,22 @@ include "QBE/QBETypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
-def QBE_FooOp : QBE_Op<"foo", [Pure, SameOperandsAndResultType]> {
-    let summary = "Illustrates how to define an operation.";
-    let description = [{
-        The `qbe.foo` operation illustrates how to define a new
-        operation in a dialect. It uses an operation trait to declare that it
-        has no side effects.
-
-        This operation takes an integer argument and returns an integer.
-
-        Example:
-
-        ```mlir
-        %0 = arith.constant 2 : i32
-        // Apply the foo operation to %0
-        %1 = qbe.foo %0 : i32
-        ```
-    }];
-
-    let arguments = (ins I32:$input);
-    let results = (outs I32:$res);
-
-    let assemblyFormat = [{
-        $input attr-dict `:` type($input)
-    }];
+class QBE_ArithOpBase<Type type, string mnemonic, list<Trait> traits = []>
+    : QBE_Op<mnemonic, !listconcat([Pure, SameOperandsAndResultType], traits)> {
+  let arguments = (ins type:$lhs, type:$rhs);
+  let results = (outs type:$res);
+  let assemblyFormat = "$lhs `,` $rhs attr-dict `:` type($res)";
 }
+
+class QBE_ArithAnyNumberOp<string mnemonic, list<Trait> traits = []>
+    : QBE_ArithOpBase<QBE_AnyNumber, mnemonic, traits>;
+
+class QBE_ArithIntegerOp<string mnemonic, list<Trait> traits = []>
+    : QBE_ArithOpBase<QBE_AnyInteger, mnemonic, traits>;
+
+def QBE_AddOp : QBE_ArithAnyNumberOp<"add", [Commutative]>;
+def QBE_SubOp : QBE_ArithAnyNumberOp<"sub">;
+def QBE_MulOp : QBE_ArithAnyNumberOp<"mul", [Commutative]>;
+def QBE_DivOp : QBE_ArithAnyNumberOp<"div">;
 
 #endif // QBE_OPS

@@ -18,11 +18,6 @@ include "mlir/IR/OpBase.td"
 def QBE_Dialect : Dialect {
     let name = "qbe";
     let summary = "A QBE MLIR dialect.";
-    let description = [{
-        This dialect is an example of an out-of-tree MLIR dialect designed to
-        illustrate the basic setup required to develop MLIR-based tools without
-        working inside of the LLVM source tree.
-    }];
     let cppNamespace = "::mlir::qbe";
 
     let useDefaultTypePrinterParser = 1;

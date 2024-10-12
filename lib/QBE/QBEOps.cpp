@@ -8,6 +8,7 @@
 
 #include "QBE/QBEOps.h"
 #include "QBE/QBEDialect.h"
+#include "QBE/QBETypes.h"
 
 #define GET_OP_CLASSES
 #include "QBE/QBEOps.cpp.inc"
