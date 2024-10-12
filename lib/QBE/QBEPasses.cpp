@@ -21,16 +21,22 @@ namespace mlir::qbe {
 #include "QBE/QBEPasses.h.inc"
 
 namespace {
-struct AddIConversionPattern : public OpConversionPattern<arith::AddIOp> {
-  using OpConversionPattern::OpConversionPattern;
-
-  LogicalResult
-  matchAndRewrite(arith::AddIOp op, OpAdaptor adaptor,
-                  ConversionPatternRewriter &rewriter) const override {
-    rewriter.replaceOpWithNewOp<qbe::AddOp>(op, adaptor.getOperands());
-    return success();
-  }
-};
+using AddIConversionPattern =
+    ToQBEConversionPatternBase<arith::AddIOp, qbe::AddOp>;
+using AddFConversionPattern =
+    ToQBEConversionPatternBase<arith::AddFOp, qbe::AddOp>;
+using SubIConversionPattern =
+    ToQBEConversionPatternBase<arith::SubIOp, qbe::SubOp>;
+using SubFConversionPattern =
+    ToQBEConversionPatternBase<arith::SubFOp, qbe::SubOp>;
+using MulIConversionPattern =
+    ToQBEConversionPatternBase<arith::MulIOp, qbe::MulOp>;
+using MulFConversionPattern =
+    ToQBEConversionPatternBase<arith::MulFOp, qbe::MulOp>;
+using DivSIConversionPattern =
+    ToQBEConversionPatternBase<arith::DivSIOp, qbe::DivOp>;
+using DivFConversionPattern =
+    ToQBEConversionPatternBase<arith::DivFOp, qbe::DivOp>;
 } // namespace
 
 struct ConvertArithToQBE
@@ -54,7 +60,18 @@ struct ConvertArithToQBE
 
 void populateArithToQBEConversionPatterns(QBETypeConverter &converter,
                                           RewritePatternSet &patterns) {
-  patterns.add<AddIConversionPattern>(converter, patterns.getContext());
+  // clang-format off
+  patterns.add<
+    AddIConversionPattern,
+    AddFConversionPattern,
+    SubIConversionPattern,
+    SubFConversionPattern,
+    MulIConversionPattern,
+    MulFConversionPattern,
+    DivSIConversionPattern,
+    DivFConversionPattern
+  >(converter, patterns.getContext());
+  // clang-format on
 }
 
 } // namespace mlir::qbe

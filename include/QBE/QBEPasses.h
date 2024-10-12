@@ -72,6 +72,19 @@ public:
   }
 };
 
+template <class From, class To>
+struct ToQBEConversionPatternBase : public OpConversionPattern<From> {
+  using OpConversionPattern<From>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(From op,
+                  typename OpConversionPattern<From>::OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    rewriter.replaceOpWithNewOp<To>(op, adaptor.getOperands());
+    return success();
+  }
+};
+
 void populateArithToQBEConversionPatterns(QBETypeConverter &converter,
                                           RewritePatternSet &patterns);
 } // namespace qbe
