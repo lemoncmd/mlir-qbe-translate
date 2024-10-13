@@ -13,11 +13,12 @@
 
 #include "QBE/Target/QBEEmitter.h"
 #include "mlir/InitAllTranslations.h"
+#include "mlir/Support/LogicalResult.h"
 #include "mlir/Tools/mlir-translate/MlirTranslateMain.h"
 
 int main(int argc, char **argv) {
   mlir::registerAllTranslations();
   mlir::qbe::registerToQBETranslation();
-  return failed(
+  return mlir::failed(
       mlir::mlirTranslateMain(argc, argv, "MLIR Translation Testing Tool"));
 }

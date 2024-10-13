@@ -6,9 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "mlir/IR/Attributes.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinTypes.h"
+#include "mlir/IR/OpImplementation.h"
+#include "mlir/IR/OperationSupport.h"
 #include "mlir/IR/SymbolTable.h"
 #include "mlir/IR/Types.h"
 #include "mlir/Interfaces/FunctionImplementation.h"
@@ -18,7 +21,6 @@
 #include "QBE/IR/QBETypes.h"
 #include "mlir/Support/LLVM.h"
 #include "mlir/Support/LogicalResult.h"
-#include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/STLExtras.h"
 #include <string>
 
@@ -60,22 +62,22 @@ ParseResult FuncOp::parse(OpAsmParser &parser, OperationState &result) {
 }
 
 LogicalResult FuncOp::verify() {
-  auto arg_tys = getArgumentTypes();
-  auto res_tys = getResultTypes();
+  auto argTys = getArgumentTypes();
+  auto resTys = getResultTypes();
 
   // checks if the arguments are all QBE types
-  for (auto arg_ty : arg_tys) {
-    if (!isa<QBEDialect>(arg_ty.getDialect())) {
+  for (auto argTy : argTys) {
+    if (!isa<QBEDialect>(argTy.getDialect())) {
       return emitOpError() << "expected QBE dialect types for arguments, got "
-                           << arg_ty;
+                           << argTy;
     }
   }
 
   // checks if the results are all QBE types
-  for (auto res_ty : res_tys) {
-    if (!isa<QBEDialect>(res_ty.getDialect())) {
+  for (auto resTy : resTys) {
+    if (!isa<QBEDialect>(resTy.getDialect())) {
       return emitOpError() << "expected QBE dialect types for results, got "
-                           << res_ty;
+                           << resTy;
     }
   }
 

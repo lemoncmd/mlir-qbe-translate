@@ -10,12 +10,14 @@
 #include "QBE/IR/QBEOps.h"
 #include "QBE/Transforms/QBEPasses.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/IR/BuiltinDialect.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/PatternMatch.h"
+#include "mlir/Support/LLVM.h"
 #include "mlir/Support/LogicalResult.h"
 #include "mlir/Transforms/DialectConversion.h"
+#include "llvm/ADT/STLExtras.h"
+#include <utility>
 
 namespace mlir::qbe {
 #define GEN_PASS_DEF_CONVERTFUNCTOQBE

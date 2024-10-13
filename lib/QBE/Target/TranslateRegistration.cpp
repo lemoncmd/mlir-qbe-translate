@@ -8,11 +8,14 @@
 
 #include "QBE/IR/QBEDialect.h"
 #include "QBE/Target/QBEEmitter.h"
+#include "mlir/IR/DialectRegistry.h"
+#include "mlir/IR/Operation.h"
 #include "mlir/Tools/mlir-translate/Translation.h"
+#include "llvm/Support/raw_ostream.h"
 
 namespace mlir::qbe {
 void registerToQBETranslation() {
-  mlir::TranslateFromMLIRRegistration withdescription(
+  const mlir::TranslateFromMLIRRegistration withdescription(
       "mlir-to-qbeir", "Translate MLIR to QBE IR",
       [](mlir::Operation *op, llvm::raw_ostream &output) {
         return mlir::qbe::translateToQBE(op, output);

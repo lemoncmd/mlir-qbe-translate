@@ -8,11 +8,13 @@
 
 #include "QBE/IR/QBEOps.h"
 #include "QBE/IR/QBETypes.h"
+#include "mlir/IR/Block.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Diagnostics.h"
 #include "mlir/IR/Location.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Types.h"
+#include "mlir/IR/Value.h"
 #include "mlir/Support/IndentedOstream.h"
 #include "mlir/Support/LLVM.h"
 #include "mlir/Support/LogicalResult.h"
@@ -20,6 +22,8 @@
 #include "llvm/ADT/ScopedHashTable.h"
 #include "llvm/ADT/TypeSwitch.h"
 #include "llvm/Support/FormatVariadic.h"
+#include <cstdint>
+#include <string>
 
 using namespace mlir;
 
@@ -95,7 +99,7 @@ private:
 };
 
 static LogicalResult printOperation(Emitter &emitter, ModuleOp moduleOp) {
-  Emitter::Scope scope(emitter);
+  const Emitter::Scope scope(emitter);
   for (Operation &op : moduleOp) {
     if (failed(emitter.emitOperation(op)))
       return failure();
@@ -104,7 +108,7 @@ static LogicalResult printOperation(Emitter &emitter, ModuleOp moduleOp) {
 }
 
 static LogicalResult printOperation(Emitter &emitter, FuncOp funcOp) {
-  Emitter::Scope scope(emitter);
+  const Emitter::Scope scope(emitter);
   auto &os = emitter.ostream();
   os << "function ";
   if (funcOp.getNumResults() == 1) {
@@ -176,14 +180,14 @@ StringRef Emitter::getOrCreateName(Block &block, StringRef prefix) {
 }
 
 LogicalResult Emitter::emitType(Location loc, Type type) {
-  StringRef name = llvm::TypeSwitch<Type, StringRef>(type)
-                       .Case<QBEWordType>([&](auto) { return "w"; })
-                       .Case<QBELongType>([&](auto) { return "l"; })
-                       .Case<QBESingleType>([&](auto) { return "s"; })
-                       .Case<QBEDoubleType>([&](auto) { return "d"; })
-                       .Default([&](Type) { return ""; });
+  const StringRef name = llvm::TypeSwitch<Type, StringRef>(type)
+                             .Case<QBEWordType>([&](auto) { return "w"; })
+                             .Case<QBELongType>([&](auto) { return "l"; })
+                             .Case<QBESingleType>([&](auto) { return "s"; })
+                             .Case<QBEDoubleType>([&](auto) { return "d"; })
+                             .Default([&](Type) { return ""; });
 
-  if (name == "")
+  if (name.empty())
     return emitError(loc) << "unable to print type " << type;
 
   os << name;

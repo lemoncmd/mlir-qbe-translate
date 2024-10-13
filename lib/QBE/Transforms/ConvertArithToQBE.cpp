@@ -10,11 +10,11 @@
 #include "QBE/IR/QBEOps.h"
 #include "QBE/Transforms/QBEPasses.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
-#include "mlir/IR/BuiltinDialect.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Support/LogicalResult.h"
 #include "mlir/Transforms/DialectConversion.h"
+#include <utility>
 
 namespace mlir::qbe {
 #define GEN_PASS_DEF_CONVERTARITHTOQBE
