@@ -5,8 +5,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-#ifndef QBE_QBEPASSES_H
-#define QBE_QBEPASSES_H
+#ifndef QBE_TRANSFORMS_QBEPASSES_H
+#define QBE_TRANSFORMS_QBEPASSES_H
 
 #include "QBE/IR/QBEDialect.h"
 #include "QBE/IR/QBEOps.h"
@@ -92,4 +92,4 @@ void populateFuncToQBEConversionPatterns(QBETypeConverter &converter,
 } // namespace qbe
 } // namespace mlir
 
-#endif // QBE_QBEPASSES_H
+#endif // QBE_TRANSFORMS_QBEPASSES_H

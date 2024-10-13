@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef QBE_QBEDIALECT_H
-#define QBE_QBEDIALECT_H
+#ifndef QBE_IR_QBEDIALECT_H
+#define QBE_IR_QBEDIALECT_H
 
 #include "mlir/Bytecode/BytecodeOpInterface.h"
 #include "mlir/IR/Dialect.h"
 
 #include "QBE/IR/QBEOpsDialect.h.inc"
 
-#endif // QBE_QBEDIALECT_H
+#endif // QBE_IR_QBEDIALECT_H

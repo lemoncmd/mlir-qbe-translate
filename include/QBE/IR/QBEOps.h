@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef QBE_QBEOPS_H
-#define QBE_QBEOPS_H
+#ifndef QBE_IR_QBEOPS_H
+#define QBE_IR_QBEOPS_H
 
 #include "mlir/Bytecode/BytecodeOpInterface.h"
 #include "mlir/IR/BuiltinTypes.h"
@@ -23,4 +23,4 @@
 #define GET_OP_CLASSES
 #include "QBE/IR/QBEOps.h.inc"
 
-#endif // QBE_QBEOPS_H
+#endif // QBE_IR_QBEOPS_H

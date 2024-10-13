@@ -6,12 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef QBE_QBETYPES_H
-#define QBE_QBETYPES_H
+#ifndef QBE_IR_QBETYPES_H
+#define QBE_IR_QBETYPES_H
 
 #include "mlir/IR/BuiltinTypes.h"
 
 #define GET_TYPEDEF_CLASSES
 #include "QBE/IR/QBEOpsTypes.h.inc"
 
-#endif // QBE_QBETYPES_H
+#endif // QBE_IR_QBETYPES_H

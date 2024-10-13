@@ -1,4 +1,4 @@
-//===- qbe-translate.cpp ---------------------------------*- C++ -*-===//
+//===- qbe-translate.cpp ----------------------------------------*- C++ -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -11,26 +11,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "QBE/IR/QBEDialect.h"
-#include "mlir/IR/DialectRegistry.h"
-#include "mlir/IR/Operation.h"
+#include "QBE/Target/QBEEmitter.h"
 #include "mlir/InitAllTranslations.h"
-#include "mlir/Support/LogicalResult.h"
 #include "mlir/Tools/mlir-translate/MlirTranslateMain.h"
-#include "mlir/Tools/mlir-translate/Translation.h"
-#include "llvm/Support/raw_ostream.h"
 
 int main(int argc, char **argv) {
   mlir::registerAllTranslations();
-
-  // TODO: Register qbe translations here.
-  mlir::TranslateFromMLIRRegistration withdescription(
-      "option", "different from option",
-      [](mlir::Operation *op, llvm::raw_ostream &output) {
-        return mlir::LogicalResult::success();
-      },
-      [](mlir::DialectRegistry &a) {});
-
+  mlir::qbe::registerToQBETranslation();
   return failed(
       mlir::mlirTranslateMain(argc, argv, "MLIR Translation Testing Tool"));
 }
