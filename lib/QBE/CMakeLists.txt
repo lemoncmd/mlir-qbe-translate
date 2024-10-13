@@ -1,23 +1,35 @@
 add_mlir_dialect_library(MLIRQBEDialect
-        QBETypes.cpp
-        QBEDialect.cpp
-        QBEOps.cpp
-        QBEPasses.cpp
+  IR/QBETypes.cpp
+  IR/QBEDialect.cpp
+  IR/QBEOps.cpp
 
-        ADDITIONAL_HEADER_DIRS
-        ${PROJECT_SOURCE_DIR}/include/QBE
+  ADDITIONAL_HEADER_DIRS
+  ${PROJECT_SOURCE_DIR}/include/QBE
 
-        DEPENDS
-        MLIRQBEOpsIncGen
-        MLIRQBEPassesIncGen
+  DEPENDS
+  MLIRQBEOpsIncGen
 
-        LINK_LIBS PUBLIC
-        MLIRIR
-        MLIRInferTypeOpInterface
-        MLIRArithDialect
-        MLIRControlFlowDialect
-        MLIRFuncDialect
-        MLIRIndexDialect
-        MLIRMathDialect
-        MLIRMemRefDialect
-        )
+  LINK_LIBS PUBLIC
+  MLIRIR
+  MLIRInferTypeOpInterface
+  )
+
+add_mlir_dialect_library(MLIRQBETransforms
+  Transforms/ConvertArithToQBE.cpp
+
+  ADDITIONAL_HEADER_DIRS
+  ${PROJECT_SOURCE_DIR}/include/QBE
+
+  DEPENDS
+  MLIRQBEPassesIncGen
+
+  LINK_LIBS PUBLIC
+  MLIRIR
+  MLIRInferTypeOpInterface
+  MLIRArithDialect
+  MLIRControlFlowDialect
+  MLIRFuncDialect
+  MLIRIndexDialect
+  MLIRMathDialect
+  MLIRMemRefDialect
+  )

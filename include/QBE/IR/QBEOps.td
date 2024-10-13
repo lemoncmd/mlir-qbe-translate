@@ -9,7 +9,7 @@
 #ifndef QBE_OPS
 #define QBE_OPS
 
-include "QBE/QBETypes.td"
+include "QBE/IR/QBETypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 

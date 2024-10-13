@@ -8,8 +8,8 @@
 #ifndef QBE_QBEPASSES_H
 #define QBE_QBEPASSES_H
 
-#include "QBE/QBEDialect.h"
-#include "QBE/QBEOps.h"
+#include "QBE/IR/QBEDialect.h"
+#include "QBE/IR/QBEOps.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Pass/Pass.h"

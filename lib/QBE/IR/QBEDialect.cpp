@@ -6,14 +6,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "QBE/QBEDialect.h"
-#include "QBE/QBEOps.h"
-#include "QBE/QBETypes.h"
+#include "QBE/IR/QBEDialect.h"
+#include "QBE/IR/QBEOps.h"
+#include "QBE/IR/QBETypes.h"
 
 using namespace mlir;
 using namespace mlir::qbe;
 
-#include "QBE/QBEOpsDialect.cpp.inc"
+#include "QBE/IR/QBEOpsDialect.cpp.inc"
 
 //===----------------------------------------------------------------------===//
 // QBE dialect.

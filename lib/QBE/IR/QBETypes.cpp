@@ -6,9 +6,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "QBE/QBETypes.h"
+#include "QBE/IR/QBETypes.h"
 
-#include "QBE/QBEDialect.h"
+#include "QBE/IR/QBEDialect.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/DialectImplementation.h"
 #include "llvm/ADT/TypeSwitch.h"
@@ -16,11 +16,11 @@
 using namespace mlir::qbe;
 
 #define GET_TYPEDEF_CLASSES
-#include "QBE/QBEOpsTypes.cpp.inc"
+#include "QBE/IR/QBEOpsTypes.cpp.inc"
 
 void QBEDialect::registerTypes() {
   addTypes<
 #define GET_TYPEDEF_LIST
-#include "QBE/QBEOpsTypes.cpp.inc"
+#include "QBE/IR/QBEOpsTypes.cpp.inc"
       >();
 }

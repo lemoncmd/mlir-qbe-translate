@@ -16,8 +16,8 @@
 #include "mlir/Support/FileUtilities.h"
 #include "mlir/Tools/mlir-opt/MlirOptMain.h"
 
-#include "QBE/QBEDialect.h"
-#include "QBE/QBEPasses.h"
+#include "QBE/IR/QBEDialect.h"
+#include "QBE/Transforms/QBEPasses.h"
 
 int main(int argc, char **argv) {
   mlir::registerAllPasses();

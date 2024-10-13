@@ -15,9 +15,9 @@
 #include "mlir/Interfaces/InferTypeOpInterface.h"
 #include "mlir/Interfaces/SideEffectInterfaces.h"
 
-#include "QBE/QBETypes.h"
+#include "QBE/IR/QBETypes.h"
 
 #define GET_OP_CLASSES
-#include "QBE/QBEOps.h.inc"
+#include "QBE/IR/QBEOps.h.inc"
 
 #endif // QBE_QBEOPS_H

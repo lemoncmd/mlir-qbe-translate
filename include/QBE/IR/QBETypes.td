@@ -10,7 +10,7 @@
 #define QBE_TYPES
 
 include "mlir/IR/AttrTypeBase.td"
-include "QBE/QBEDialect.td"
+include "QBE/IR/QBEDialect.td"
 
 //===----------------------------------------------------------------------===//
 // QBE type definitions

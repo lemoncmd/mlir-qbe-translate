@@ -1,4 +1,4 @@
-//===- QBEPasses.cpp - QBE passes -------------------------------*- C++ -*-===//
+//===- ConvertArithToQBE.cpp - Arith to QBE dialect conversion --*- C++ -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,9 +6,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "QBE/QBEPasses.h"
-#include "QBE/QBEDialect.h"
-#include "QBE/QBEOps.h"
+#include "QBE/IR/QBEDialect.h"
+#include "QBE/IR/QBEOps.h"
+#include "QBE/Transforms/QBEPasses.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/IR/BuiltinDialect.h"
 #include "mlir/IR/BuiltinOps.h"
@@ -18,7 +18,7 @@
 
 namespace mlir::qbe {
 #define GEN_PASS_DEF_CONVERTARITHTOQBE
-#include "QBE/QBEPasses.h.inc"
+#include "QBE/Transforms/QBEPasses.h.inc"
 
 namespace {
 using AddIConversionPattern =

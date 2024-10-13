@@ -17,6 +17,7 @@ target_link_libraries(qbe-translate
   MLIRParser
   MLIRPass
   MLIRQBEDialect
+  MLIRQBETransforms
   MLIRTranslateLib
   MLIRSupport
   )

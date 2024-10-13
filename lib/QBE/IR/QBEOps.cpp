@@ -1,4 +1,4 @@
-//===- QBEDialect.h - QBE dialect -------------------------------*- C++ -*-===//
+//===- QBEOps.cpp - QBE dialect ops -----------------------------*- C++ -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,12 +6,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef QBE_QBEDIALECT_H
-#define QBE_QBEDIALECT_H
+#include "QBE/IR/QBEOps.h"
+#include "QBE/IR/QBEDialect.h"
+#include "QBE/IR/QBETypes.h"
 
-#include "mlir/Bytecode/BytecodeOpInterface.h"
-#include "mlir/IR/Dialect.h"
-
-#include "QBE/QBEOpsDialect.h.inc"
-
-#endif // QBE_QBEDIALECT_H
+#define GET_OP_CLASSES
+#include "QBE/IR/QBEOps.cpp.inc"
