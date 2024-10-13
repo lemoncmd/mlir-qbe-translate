@@ -12,6 +12,79 @@
 include "QBE/IR/QBETypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/Interfaces/ControlFlowInterfaces.td"
+include "mlir/Interfaces/FunctionInterfaces.td"
+
+//===----------------------------------------------------------------------===//
+// Function Ops
+//===----------------------------------------------------------------------===//
+
+def QBE_FuncOp : QBE_Op<"func", [
+  AutomaticAllocationScope, FunctionOpInterface,
+  IsolatedFromAbove
+]> {
+  let summary = "QBE dialect function.";
+  let description = [{
+    QBE function op provides QBE compatible function.
+
+    Example:
+    ```
+    qbe.func @foo(%a: !qbe.word) -> !qbe.word {
+      %b = qbe.neg %a : !qbe.word
+      qbe.return %b : !qbe.word
+    }
+    ```
+  }];
+
+  let arguments = (ins
+    TypeAttrOf<FunctionType>:$function_type,
+    OptionalAttr<DictArrayAttr>:$arg_attrs,
+    OptionalAttr<DictArrayAttr>:$res_attrs,
+    StrAttr:$sym_name
+  );
+
+  let regions = (region AnyRegion:$body);
+
+  let builders = [
+    OpBuilder<(ins
+      "StringRef":$name,
+      "FunctionType":$type,
+      CArg<"ArrayRef<NamedAttribute>", "{}">:$attrs
+    )>
+  ];
+
+  let extraClassDeclaration = [{
+    ::mlir::Region *getCallableRegion() { return isExternal() ? nullptr : &getBody(); }
+
+    ArrayRef<Type> getArgumentTypes() { return getFunctionType().getInputs(); }
+
+    ArrayRef<Type> getResultTypes() { return getFunctionType().getResults(); }
+  }];
+
+  let hasCustomAssemblyFormat = 1;
+
+  let hasVerifier = 1;
+}
+
+def QBE_ReturnOp : QBE_Op<"return", [
+  HasParent<"FuncOp">, MemRefsNormalizable, Pure, Terminator, ReturnLike
+]> {
+  let summary = "QBE dialect return.";
+  let description = [{
+    A terminator operation for regions of qbe function body.
+    The operands are the result of the function.
+  }];
+
+  let arguments = (ins Variadic<AnyType>:$operands);
+
+  let assemblyFormat = "attr-dict ($operands^ `:` type($operands))?";
+
+  let hasVerifier = 1;
+}
+
+//===----------------------------------------------------------------------===//
+// Arithmetic Ops
+//===----------------------------------------------------------------------===//
 
 class QBE_ArithOpBase<Type type, string mnemonic, list<Trait> traits = []>
     : QBE_Op<mnemonic, !listconcat([Pure, SameOperandsAndResultType], traits)> {
