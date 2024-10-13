@@ -16,8 +16,8 @@ qbe.func @one_operand(%a: !qbe.word) {
 
 // -----
 
-// CHECK: qbe.func @one_operand(%{{.*}}: !qbe.word, %{{.*}}: !qbe.single, %{{.*}}: !qbe.long)
-qbe.func @one_operand(%a: !qbe.word, %b: !qbe.single, %c: !qbe.long) {
+// CHECK: qbe.func @multi_operands(%{{.*}}: !qbe.word, %{{.*}}: !qbe.single, %{{.*}}: !qbe.long)
+qbe.func @multi_operands(%a: !qbe.word, %b: !qbe.single, %c: !qbe.long) {
   // CHECK: qbe.return
   qbe.return
 }

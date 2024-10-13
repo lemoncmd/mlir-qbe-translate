@@ -16,8 +16,8 @@ func.func @one_operand(%a: i32) {
 
 // -----
 
-// CHECK: qbe.func @one_operand(%{{.*}}: !qbe.word, %{{.*}}: !qbe.single, %{{.*}}: !qbe.long)
-func.func @one_operand(%a: i32, %b: f32, %c: i64) {
+// CHECK: qbe.func @multi_operands(%{{.*}}: !qbe.word, %{{.*}}: !qbe.single, %{{.*}}: !qbe.long)
+func.func @multi_operands(%a: i32, %b: f32, %c: i64) {
   // CHECK: qbe.return
   return
 }
