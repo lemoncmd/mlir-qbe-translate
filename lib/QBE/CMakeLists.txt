@@ -16,6 +16,7 @@ add_mlir_dialect_library(MLIRQBEDialect
 
 add_mlir_dialect_library(MLIRQBETransforms
   Transforms/ConvertArithToQBE.cpp
+  Transforms/ConvertFuncToQBE.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${PROJECT_SOURCE_DIR}/include/QBE

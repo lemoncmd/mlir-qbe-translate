@@ -7,6 +7,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "mlir/IR/Builders.h"
+#include "mlir/IR/BuiltinAttributes.h"
+#include "mlir/IR/BuiltinTypes.h"
+#include "mlir/IR/SymbolTable.h"
 #include "mlir/IR/Types.h"
 #include "mlir/Interfaces/FunctionImplementation.h"
 
@@ -28,6 +31,15 @@ using namespace mlir::qbe;
 //===----------------------------------------------------------------------===//
 // FuncOp
 //===----------------------------------------------------------------------===//
+
+void FuncOp::build(OpBuilder &builder, OperationState &state, StringRef name,
+                   FunctionType type, ArrayRef<NamedAttribute> attrs) {
+  state.addAttribute(SymbolTable::getSymbolAttrName(),
+                     builder.getStringAttr(name));
+  state.addAttribute(getFunctionTypeAttrName(state.name), TypeAttr::get(type));
+  state.attributes.append(attrs.begin(), attrs.end());
+  state.addRegion();
+}
 
 void FuncOp::print(OpAsmPrinter &p) {
   function_interface_impl::printFunctionOp(

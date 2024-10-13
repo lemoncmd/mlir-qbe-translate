@@ -86,6 +86,9 @@ struct ToQBEConversionPatternBase : public OpConversionPattern<From> {
 
 void populateArithToQBEConversionPatterns(QBETypeConverter &converter,
                                           RewritePatternSet &patterns);
+
+void populateFuncToQBEConversionPatterns(QBETypeConverter &converter,
+                                         RewritePatternSet &patterns);
 } // namespace qbe
 } // namespace mlir
 
