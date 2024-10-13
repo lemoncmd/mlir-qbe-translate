@@ -10,7 +10,6 @@
 
 #include "QBE/QBEDialect.h"
 #include "QBE/QBEOps.h"
-#include "QBE/QBETypes.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Pass/Pass.h"

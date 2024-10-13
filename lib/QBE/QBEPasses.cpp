@@ -37,6 +37,26 @@ using DivSIConversionPattern =
     ToQBEConversionPatternBase<arith::DivSIOp, qbe::DivOp>;
 using DivFConversionPattern =
     ToQBEConversionPatternBase<arith::DivFOp, qbe::DivOp>;
+using NegFConversionPattern =
+    ToQBEConversionPatternBase<arith::NegFOp, qbe::NegOp>;
+using DivUIConversionPattern =
+    ToQBEConversionPatternBase<arith::DivUIOp, qbe::UDivOp>;
+using RemSIConversionPattern =
+    ToQBEConversionPatternBase<arith::RemSIOp, qbe::RemOp>;
+using RemUIConversionPattern =
+    ToQBEConversionPatternBase<arith::RemUIOp, qbe::URemOp>;
+using OrIConversionPattern =
+    ToQBEConversionPatternBase<arith::OrIOp, qbe::OrOp>;
+using XOrIConversionPattern =
+    ToQBEConversionPatternBase<arith::XOrIOp, qbe::XorOp>;
+using AndIConversionPattern =
+    ToQBEConversionPatternBase<arith::AndIOp, qbe::AndOp>;
+using ShRSIConversionPattern =
+    ToQBEConversionPatternBase<arith::ShRSIOp, qbe::SarOp>;
+using ShRUIConversionPattern =
+    ToQBEConversionPatternBase<arith::ShRUIOp, qbe::ShrOp>;
+using ShLIConversionPattern =
+    ToQBEConversionPatternBase<arith::ShLIOp, qbe::ShlOp>;
 } // namespace
 
 struct ConvertArithToQBE
@@ -69,7 +89,17 @@ void populateArithToQBEConversionPatterns(QBETypeConverter &converter,
     MulIConversionPattern,
     MulFConversionPattern,
     DivSIConversionPattern,
-    DivFConversionPattern
+    DivFConversionPattern,
+    NegFConversionPattern,
+    DivUIConversionPattern,
+    RemSIConversionPattern,
+    RemUIConversionPattern,
+    OrIConversionPattern,
+    XOrIConversionPattern,
+    AndIConversionPattern,
+    ShRSIConversionPattern,
+    ShRUIConversionPattern,
+    ShLIConversionPattern
   >(converter, patterns.getContext());
   // clang-format on
 }
