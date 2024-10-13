@@ -19,10 +19,10 @@
 namespace mlir {
 namespace qbe {
 #define GEN_PASS_DECL
-#include "QBE/QBEPasses.h.inc"
+#include "QBE/Transforms/QBEPasses.h.inc"
 
 #define GEN_PASS_REGISTRATION
-#include "QBE/QBEPasses.h.inc"
+#include "QBE/Transforms/QBEPasses.h.inc"
 
 class QBETypeConverter : public TypeConverter {
 public:

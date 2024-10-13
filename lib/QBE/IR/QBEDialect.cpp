@@ -22,7 +22,7 @@ using namespace mlir::qbe;
 void QBEDialect::initialize() {
   addOperations<
 #define GET_OP_LIST
-#include "QBE/QBEOps.cpp.inc"
+#include "QBE/IR/QBEOps.cpp.inc"
       >();
   registerTypes();
 }
