@@ -1,5 +1,6 @@
 add_mlir_dialect_library(MLIRQBETransforms
   ConvertArithToQBE.cpp
+  ConvertControlFlowToQBE.cpp
   ConvertFuncToQBE.cpp
 
   ADDITIONAL_HEADER_DIRS

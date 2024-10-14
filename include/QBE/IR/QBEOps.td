@@ -16,7 +16,7 @@ include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/FunctionInterfaces.td"
 
 //===----------------------------------------------------------------------===//
-// Function Ops
+// Function and Jump Ops
 //===----------------------------------------------------------------------===//
 
 def QBE_FuncOp : QBE_Op<"func", [
@@ -64,6 +64,41 @@ def QBE_FuncOp : QBE_Op<"func", [
   let hasCustomAssemblyFormat = 1;
 
   let hasVerifier = 1;
+}
+
+def QBE_JmpOp : QBE_Op<"jmp", [
+  //DeclareOpInterfaceMethods<BranchOpInterface>,
+  Pure, Terminator
+]> {
+  let summary = "QBE dialect unconditional jump.";
+  let description = [{
+    A terminator operation which jumps unconditionally to target block.
+  }];
+  let successors = (successor AnySuccessor:$dest);
+  let assemblyFormat = "$dest attr-dict";
+}
+
+def QBE_JnzOp : QBE_Op<"jnz", [
+  /* AttrSizedOperandSegments,
+  DeclareOpInterfaceMethods<BranchOpInterface>,*/ Pure, Terminator
+]> {
+  let summary = "QBE dialect conditional jump.";
+  let description = [{
+    A terminator operation which conditionally jumps to target blocks.
+    When the argument is non-zero, it jumps to the first block.
+    Otherwise it jumps to the second block.
+  }];
+  let arguments = (ins QBE_WordType:$cond);
+  let successors = (successor AnySuccessor:$trueDest, AnySuccessor:$falseDest);
+  let assemblyFormat = "$cond `,` $trueDest `,` $falseDest attr-dict";
+}
+
+def QBE_HaltOp : QBE_Op<"hlt", [Terminator]> {
+  let summary = "QBE dialect halt.";
+  let description = [{
+    A terminator operation with a target-dependent error.
+  }];
+  let assemblyFormat = "attr-dict";
 }
 
 def QBE_ReturnOp : QBE_Op<"return", [

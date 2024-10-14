@@ -19,6 +19,14 @@ def ConvertArithToQBE: Pass<"convert-arith-to-qbe"> {
   let dependentDialects = ["arith::ArithDialect", "qbe::QBEDialect"];
 }
 
+def ConvertControlFlowToQBE: Pass<"convert-cf-to-qbe"> {
+  let summary = "Convert Control Flow dialect to QBE dialect";
+  let description = [{
+    This pass converts supported Func ops to QBE ops.
+  }];
+  let dependentDialects = ["cf::ControlFlowDialect", "qbe::QBEDialect"];
+}
+
 def ConvertFuncToQBE: Pass<"convert-func-to-qbe"> {
   let summary = "Convert Func dialect to QBE dialect";
   let description = [{

@@ -135,6 +135,10 @@ static LogicalResult printOperation(Emitter &emitter, FuncOp funcOp) {
   emitter.resetValueCount();
   emitter.resetBlockCount();
   for (Block &block : blocks) {
+    emitter.getOrCreateName(block);
+  }
+
+  for (Block &block : blocks) {
     os << emitter.getOrCreateName(block) << "\n";
     os.indent();
     for (Operation &op : block.getOperations()) {
@@ -145,6 +149,26 @@ static LogicalResult printOperation(Emitter &emitter, FuncOp funcOp) {
   }
 
   os << "}\n";
+  return success();
+}
+
+static LogicalResult printOperation(Emitter &emitter, JmpOp jmpOp) {
+  auto &os = emitter.ostream();
+  os << "jmp " << emitter.getOrCreateName(*jmpOp.getDest());
+  return success();
+}
+
+static LogicalResult printOperation(Emitter &emitter, JnzOp jnzOp) {
+  auto &os = emitter.ostream();
+  os << "jnz " << emitter.getOrCreateName(jnzOp.getCond()) << ", "
+     << emitter.getOrCreateName(*jnzOp.getTrueDest()) << ", "
+     << emitter.getOrCreateName(*jnzOp.getFalseDest());
+  return success();
+}
+
+static LogicalResult printOperation(Emitter &emitter, HaltOp) {
+  auto &os = emitter.ostream();
+  os << "hlt";
   return success();
 }
 
@@ -262,7 +286,8 @@ LogicalResult Emitter::emitOperation(Operation &op) {
   LogicalResult status =
       llvm::TypeSwitch<Operation *, LogicalResult>(&op)
           .Case<ModuleOp, FuncOp, ReturnOp, AddOp, SubOp, MulOp, DivOp, UDivOp,
-                RemOp, URemOp, OrOp, XorOp, AndOp, SarOp, ShrOp, ShlOp, NegOp>(
+                RemOp, URemOp, OrOp, XorOp, AndOp, SarOp, ShrOp, ShlOp, NegOp,
+                JmpOp, JnzOp, HaltOp>(
               [&](auto op) { return printOperation(*this, op); })
           .Default([&](Operation *) {
             return op.emitOpError("unable to find printer for op");

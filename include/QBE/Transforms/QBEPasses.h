@@ -30,6 +30,7 @@ public:
     addConversion([](Type type) { return type; });
     addConversion([ctx](IntegerType type) -> Type {
       switch (type.getWidth()) {
+      case 1: // Bool is Word in QBE
       case 32: {
         return QBEWordType::get(ctx);
       } break;
@@ -86,6 +87,9 @@ struct ToQBEConversionPatternBase : public OpConversionPattern<From> {
 
 void populateArithToQBEConversionPatterns(QBETypeConverter &converter,
                                           RewritePatternSet &patterns);
+
+void populateControlFlowToQBEConversionPatterns(QBETypeConverter &converter,
+                                                RewritePatternSet &patterns);
 
 void populateFuncToQBEConversionPatterns(QBETypeConverter &converter,
                                          RewritePatternSet &patterns);
