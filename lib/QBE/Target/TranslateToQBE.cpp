@@ -124,7 +124,7 @@ static LogicalResult printOperation(Emitter &emitter, FuncOp funcOp) {
           funcOp.getArguments(), os, [&](BlockArgument arg) -> LogicalResult {
             if (failed(emitter.emitType(funcOp.getLoc(), arg.getType())))
               return failure();
-            os << " " << emitter.getOrCreateName(arg);
+            os << " " << emitter.getOrCreateName(arg, "arg");
             return success();
           })))
     return failure();
@@ -157,25 +157,89 @@ static LogicalResult printOperation(Emitter &emitter, ReturnOp returnOp) {
   return success();
 }
 
-static LogicalResult printOperation(Emitter &emitter, AddOp addOp) {
+template <class T>
+static LogicalResult printBinaryOperation(Emitter &emitter, T op) {
   auto &os = emitter.ostream();
-  os << emitter.getOrCreateName(addOp.getRes()) << " =";
-  if (failed(emitter.emitType(addOp.getLoc(), addOp.getType())))
+  os << emitter.getOrCreateName(op.getRes()) << " =";
+  if (failed(emitter.emitType(op.getLoc(), op.getType())))
     return failure();
-  os << " add " << emitter.getOrCreateName(addOp.getLhs()) << ", "
-     << emitter.getOrCreateName(addOp.getRhs());
+  os << " " << op->getName().stripDialect() << " "
+     << emitter.getOrCreateName(op.getLhs()) << ", "
+     << emitter.getOrCreateName(op.getRhs());
+  return success();
+}
+
+static LogicalResult printOperation(Emitter &emitter, AddOp addOp) {
+  return printBinaryOperation(emitter, addOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, SubOp subOp) {
+  return printBinaryOperation(emitter, subOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, MulOp mulOp) {
+  return printBinaryOperation(emitter, mulOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, DivOp divOp) {
+  return printBinaryOperation(emitter, divOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, UDivOp udivOp) {
+  return printBinaryOperation(emitter, udivOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, RemOp remOp) {
+  return printBinaryOperation(emitter, remOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, URemOp uremOp) {
+  return printBinaryOperation(emitter, uremOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, OrOp orOp) {
+  return printBinaryOperation(emitter, orOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, XorOp xorOp) {
+  return printBinaryOperation(emitter, xorOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, AndOp andOp) {
+  return printBinaryOperation(emitter, andOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, SarOp sarOp) {
+  return printBinaryOperation(emitter, sarOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, ShrOp shrOp) {
+  return printBinaryOperation(emitter, shrOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, ShlOp shlOp) {
+  return printBinaryOperation(emitter, shlOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, NegOp negOp) {
+  auto &os = emitter.ostream();
+  os << emitter.getOrCreateName(negOp.getRes()) << " =";
+  if (failed(emitter.emitType(negOp.getLoc(), negOp.getType())))
+    return failure();
+  os << " " << negOp->getName().stripDialect() << " "
+     << emitter.getOrCreateName(negOp.getValue());
   return success();
 }
 
 StringRef Emitter::getOrCreateName(Value value, StringRef prefix) {
   if (!valueMapper.count(value))
-    valueMapper.insert(value, formatv("%{0}{1}", prefix, ++valueCount));
+    valueMapper.insert(value, formatv("%{0}{1}", prefix, valueCount++));
   return *valueMapper.begin(value);
 }
 
 StringRef Emitter::getOrCreateName(Block &block, StringRef prefix) {
   if (!blockMapper.count(&block))
-    blockMapper.insert(&block, formatv("@{0}{1}", prefix, ++blockCount));
+    blockMapper.insert(&block, formatv("@{0}{1}", prefix, blockCount++));
   return *blockMapper.begin(&block);
 }
 
@@ -197,7 +261,8 @@ LogicalResult Emitter::emitType(Location loc, Type type) {
 LogicalResult Emitter::emitOperation(Operation &op) {
   LogicalResult status =
       llvm::TypeSwitch<Operation *, LogicalResult>(&op)
-          .Case<ModuleOp, FuncOp, ReturnOp, AddOp>(
+          .Case<ModuleOp, FuncOp, ReturnOp, AddOp, SubOp, MulOp, DivOp, UDivOp,
+                RemOp, URemOp, OrOp, XorOp, AndOp, SarOp, ShrOp, ShlOp, NegOp>(
               [&](auto op) { return printOperation(*this, op); })
           .Default([&](Operation *) {
             return op.emitOpError("unable to find printer for op");

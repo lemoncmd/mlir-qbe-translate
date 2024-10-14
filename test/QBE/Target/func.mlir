@@ -2,7 +2,7 @@
 
 // CHECK: function $none()
 qbe.func @none() {
-  // CHECK: @block1
+  // CHECK: @block0
   // CHECK: ret
   qbe.return
 }
@@ -11,7 +11,7 @@ qbe.func @none() {
 
 // CHECK: function $one_operand(w %{{.*}})
 qbe.func @one_operand(%a: !qbe.word) {
-  // CHECK: @block1
+  // CHECK: @block0
   // CHECK: ret
   qbe.return
 }
@@ -20,7 +20,7 @@ qbe.func @one_operand(%a: !qbe.word) {
 
 // CHECK: function $multi_operands(w %{{.*}}, s %{{.*}}, l %{{.*}})
 qbe.func @multi_operands(%a: !qbe.word, %b: !qbe.single, %c: !qbe.long) {
-  // CHECK: @block1
+  // CHECK: @block0
   // CHECK: ret
   qbe.return
 }
@@ -29,7 +29,7 @@ qbe.func @multi_operands(%a: !qbe.word, %b: !qbe.single, %c: !qbe.long) {
 
 // CHECK: function w $hasret(w %[[VAR:.*]])
 qbe.func @hasret(%a: !qbe.word) -> !qbe.word {
-  // CHECK: @block1
+  // CHECK: @block0
   // CHECK: ret %[[VAR]]
   qbe.return %a : !qbe.word
 }
