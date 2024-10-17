@@ -110,3 +110,36 @@ qbe.func @shl(%a: !qbe.word, %b: !qbe.word) -> !qbe.word {
   qbe.return %c : !qbe.word
 }
 
+// -----
+
+qbe.func @const() -> !qbe.word {
+  %a = qbe.mlir.constant(32 : i32) : !qbe.word
+  // CHECK ret 32
+  qbe.return %a : !qbe.word
+}
+
+// -----
+
+qbe.func @sconst() -> !qbe.single {
+  %a = qbe.mlir.constant(32.0 : f32) : !qbe.single
+  // CHECK ret s_3.2{{0*}}e+01
+  qbe.return %a : !qbe.single
+}
+
+// -----
+
+qbe.func @dconst() -> !qbe.double {
+  %a = qbe.mlir.constant(64.0 : f64) : !qbe.double
+  // CHECK ret d_3.2{{0*}}e+01
+  qbe.return %a : !qbe.double
+}
+
+// -----
+
+qbe.func @op_prop() -> !qbe.long {
+  %a = qbe.mlir.constant(64 : i64) : !qbe.long
+  %b = qbe.mlir.constant(46 : i64) : !qbe.long
+  // CHECK %{{.*}} = add 64, 46
+  %c = qbe.add %a, %b : !qbe.long
+  qbe.return %c : !qbe.long
+}

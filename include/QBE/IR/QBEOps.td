@@ -10,6 +10,7 @@
 #define QBE_OPS
 
 include "QBE/IR/QBETypes.td"
+include "mlir/IR/BuiltinAttributeInterfaces.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
@@ -120,6 +121,27 @@ def QBE_ReturnOp : QBE_Op<"return", [
 //===----------------------------------------------------------------------===//
 // Arithmetic Ops
 //===----------------------------------------------------------------------===//
+
+def QBE_ConstantOp : QBE_Op<"mlir.constant", [Pure, ConstantLike]> {
+  let summary = "QBE dialect constant op.";
+  let description = [{
+    Since MLIR does not have first-class constant value,
+    this op converts constant to SSA value.
+    If the SSA value is used in usual ops, it would be converted to constant value.
+
+    Examples:
+    ```
+    %1 = qbe.mlir.constant(42 : i32) : !qbe.word
+    %2 = qbe.mlir.constant(42) : !qbe.long
+    %3 = qbe.mlir.constant(42.0 : f32) : !qbe.single
+    ```
+  }];
+  let arguments = (ins TypedAttrInterface:$value);
+  let results = (outs QBE_AnyNumber:$res);
+  let assemblyFormat = "`(` $value `)` attr-dict `:` type($res)";
+  let hasFolder = 1;
+  let hasVerifier = 1;
+}
 
 class QBE_ArithOpBase<Type type, string mnemonic, list<Trait> traits = []>
     : QBE_Op<mnemonic, !listconcat([Pure, SameOperandsAndResultType], traits)> {

@@ -57,6 +57,20 @@ using ShRUIConversionPattern =
     ToQBEConversionPatternBase<arith::ShRUIOp, qbe::ShrOp>;
 using ShLIConversionPattern =
     ToQBEConversionPatternBase<arith::ShLIOp, qbe::ShlOp>;
+
+struct ConstantConversionPattern
+    : public OpConversionPattern<arith::ConstantOp> {
+  using OpConversionPattern::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(arith::ConstantOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    rewriter.replaceOpWithNewOp<qbe::ConstantOp>(
+        op, typeConverter->convertType(adaptor.getValue().getType()),
+        op.getValue());
+    return success();
+  }
+};
 } // namespace
 
 struct ConvertArithToQBE
@@ -99,7 +113,8 @@ void populateArithToQBEConversionPatterns(QBETypeConverter &converter,
     AndIConversionPattern,
     ShRSIConversionPattern,
     ShRUIConversionPattern,
-    ShLIConversionPattern
+    ShLIConversionPattern,
+    ConstantConversionPattern
   >(converter, patterns.getContext());
   // clang-format on
 }

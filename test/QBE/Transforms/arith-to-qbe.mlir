@@ -142,3 +142,16 @@ func.func @shli(%a: i32, %b: i32) -> i32 {
   return %c : i32
 }
 
+// -----
+
+func.func @const() -> (i32, i64, f32, f64) {
+  // CHECK: %{{.*}} = qbe.mlir.constant(32 : i32) : !qbe.word
+  // CHECK: %{{.*}} = qbe.mlir.constant(64 : i64) : !qbe.long
+  // CHECK: %{{.*}} = qbe.mlir.constant(3.2{{0*}}e+01 : f32) : !qbe.single
+  // CHECK: %{{.*}} = qbe.mlir.constant(6.4{{0*}}e+01 : f64) : !qbe.double
+  %a = arith.constant 32 : i32
+  %b = arith.constant 64 : i64
+  %c = arith.constant 32.0 : f32
+  %d = arith.constant 64.0 : f64
+  return %a, %b, %c, %d : i32, i64, f32, f64
+}

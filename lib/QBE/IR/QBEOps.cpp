@@ -22,6 +22,7 @@
 #include "mlir/Support/LLVM.h"
 #include "mlir/Support/LogicalResult.h"
 #include "llvm/ADT/STLExtras.h"
+#include "llvm/ADT/TypeSwitch.h"
 #include <string>
 
 #define GET_OP_CLASSES
@@ -110,3 +111,38 @@ LogicalResult ReturnOp::verify() {
 
   return success();
 }
+
+//===----------------------------------------------------------------------===//
+// ConstantOp
+//===----------------------------------------------------------------------===//
+
+LogicalResult ConstantOp::verify() {
+  auto valType = getValue().getType();
+  auto width = 0;
+  if (isa<IntegerType>(valType)) {
+    width = cast<IntegerType>(valType).getWidth();
+  } else if (isa<FloatType>(valType)) {
+    width = cast<FloatType>(valType).getWidth();
+  } else {
+    return emitOpError("Value type expected number type but got ") << valType;
+  }
+  return llvm::TypeSwitch<Type, LogicalResult>(getType())
+      .Case<QBEWordType, QBESingleType>([&](auto) {
+        return width <= 32 ? success()
+                           : emitOpError("Value type expected less or equal to "
+                                         "32 bits length but got ")
+                                 << width;
+      })
+      .Case<QBELongType, QBEDoubleType>([&](auto) {
+        return width <= 64 ? success()
+                           : emitOpError("Value type expected less or equal to "
+                                         "64 bits length but got ")
+                                 << width;
+      })
+      .Default([&](Type ty) {
+        return emitOpError("Return type expected qbe number type but got")
+               << ty;
+      });
+}
+
+OpFoldResult ConstantOp::fold(FoldAdaptor) { return getValue(); }

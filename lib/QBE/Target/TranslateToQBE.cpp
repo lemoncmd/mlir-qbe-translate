@@ -9,7 +9,9 @@
 #include "QBE/IR/QBEOps.h"
 #include "QBE/IR/QBETypes.h"
 #include "mlir/IR/Block.h"
+#include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinOps.h"
+#include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Diagnostics.h"
 #include "mlir/IR/Location.h"
 #include "mlir/IR/Operation.h"
@@ -71,6 +73,8 @@ struct Emitter {
   StringRef getOrCreateName(Value val, StringRef prefix = "val");
 
   StringRef getOrCreateName(Block &block, StringRef prefix = "block");
+
+  void emitSSEOrConstant(Value val, StringRef prefix = "val");
 
   raw_indented_ostream &ostream() { return os; }
 
@@ -160,8 +164,9 @@ static LogicalResult printOperation(Emitter &emitter, JmpOp jmpOp) {
 
 static LogicalResult printOperation(Emitter &emitter, JnzOp jnzOp) {
   auto &os = emitter.ostream();
-  os << "jnz " << emitter.getOrCreateName(jnzOp.getCond()) << ", "
-     << emitter.getOrCreateName(*jnzOp.getTrueDest()) << ", "
+  os << "jnz ";
+  emitter.emitSSEOrConstant(jnzOp.getCond());
+  os << ", " << emitter.getOrCreateName(*jnzOp.getTrueDest()) << ", "
      << emitter.getOrCreateName(*jnzOp.getFalseDest());
   return success();
 }
@@ -176,7 +181,8 @@ static LogicalResult printOperation(Emitter &emitter, ReturnOp returnOp) {
   auto &os = emitter.ostream();
   os << "ret";
   if (returnOp.getNumOperands() == 1) {
-    os << " " << emitter.getOrCreateName(returnOp.getOperands()[0]);
+    os << " ";
+    emitter.emitSSEOrConstant(returnOp.getOperands()[0]);
   }
   return success();
 }
@@ -187,9 +193,10 @@ static LogicalResult printBinaryOperation(Emitter &emitter, T op) {
   os << emitter.getOrCreateName(op.getRes()) << " =";
   if (failed(emitter.emitType(op.getLoc(), op.getType())))
     return failure();
-  os << " " << op->getName().stripDialect() << " "
-     << emitter.getOrCreateName(op.getLhs()) << ", "
-     << emitter.getOrCreateName(op.getRhs());
+  os << " " << op->getName().stripDialect() << " ";
+  emitter.emitSSEOrConstant(op.getLhs());
+  os << ", ";
+  emitter.emitSSEOrConstant(op.getRhs());
   return success();
 }
 
@@ -250,8 +257,8 @@ static LogicalResult printOperation(Emitter &emitter, NegOp negOp) {
   os << emitter.getOrCreateName(negOp.getRes()) << " =";
   if (failed(emitter.emitType(negOp.getLoc(), negOp.getType())))
     return failure();
-  os << " " << negOp->getName().stripDialect() << " "
-     << emitter.getOrCreateName(negOp.getValue());
+  os << " " << negOp->getName().stripDialect() << " ";
+  emitter.emitSSEOrConstant(negOp.getValue());
   return success();
 }
 
@@ -265,6 +272,24 @@ StringRef Emitter::getOrCreateName(Block &block, StringRef prefix) {
   if (!blockMapper.count(&block))
     blockMapper.insert(&block, formatv("@{0}{1}", prefix, blockCount++));
   return *blockMapper.begin(&block);
+}
+
+void Emitter::emitSSEOrConstant(Value value, StringRef prefix) {
+  if (auto constOp = dyn_cast_or_null<ConstantOp>(value.getDefiningOp())) {
+    auto number = constOp.getValue();
+    if (number.getType().isIntOrIndex()) {
+      cast<IntegerAttr>(number).print(os, true);
+    } else {
+      if (number.getType().isF32()) {
+        os << "s_";
+      } else {
+        os << "d_";
+      }
+      cast<FloatAttr>(number).print(os, true);
+    }
+  } else {
+    os << getOrCreateName(value, prefix);
+  }
 }
 
 LogicalResult Emitter::emitType(Location loc, Type type) {
@@ -289,13 +314,15 @@ LogicalResult Emitter::emitOperation(Operation &op) {
                 RemOp, URemOp, OrOp, XorOp, AndOp, SarOp, ShrOp, ShlOp, NegOp,
                 JmpOp, JnzOp, HaltOp>(
               [&](auto op) { return printOperation(*this, op); })
+          .Case<ConstantOp>([](auto) { return success(); })
           .Default([&](Operation *) {
             return op.emitOpError("unable to find printer for op");
           });
   if (failed(status)) {
     return status;
   }
-  os << "\n";
+  if (!isa<ConstantOp>(op))
+    os << "\n";
   return success();
 }
 } // namespace
