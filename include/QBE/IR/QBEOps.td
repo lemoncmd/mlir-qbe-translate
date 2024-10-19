@@ -194,4 +194,28 @@ def QBE_SarOp : QBE_ShiftOpBase<"sar">;
 def QBE_ShrOp : QBE_ShiftOpBase<"shr">;
 def QBE_ShlOp : QBE_ShiftOpBase<"shl">;
 
+class QBE_CompOpBase<Type type, string mnemonic, list<Trait> traits = []>
+    : QBE_Op<mnemonic, !listconcat([Pure, AllTypesMatch<["lhs", "rhs"]>], traits)> {
+  let arguments = (ins type:$lhs, type:$rhs);
+  let results = (outs QBE_WordType:$res);
+  let assemblyFormat = "$lhs `,` $rhs attr-dict `:` type($lhs)";
+}
+
+def QBE_CeqOp : QBE_CompOpBase<QBE_AnyNumber, "ceq", [Commutative]>;
+def QBE_CneOp : QBE_CompOpBase<QBE_AnyNumber, "cne", [Commutative]>;
+def QBE_CsleOp : QBE_CompOpBase<QBE_AnyInteger, "csle">;
+def QBE_CsltOp : QBE_CompOpBase<QBE_AnyInteger, "cslt">;
+def QBE_CsgeOp : QBE_CompOpBase<QBE_AnyInteger, "csge">;
+def QBE_CsgtOp : QBE_CompOpBase<QBE_AnyInteger, "csgt">;
+def QBE_CuleOp : QBE_CompOpBase<QBE_AnyInteger, "cule">;
+def QBE_CultOp : QBE_CompOpBase<QBE_AnyInteger, "cult">;
+def QBE_CugeOp : QBE_CompOpBase<QBE_AnyInteger, "cuge">;
+def QBE_CugtOp : QBE_CompOpBase<QBE_AnyInteger, "cugt">;
+def QBE_CleOp : QBE_CompOpBase<QBE_AnyFloat, "cle">;
+def QBE_CltOp : QBE_CompOpBase<QBE_AnyFloat, "clt">;
+def QBE_CgeOp : QBE_CompOpBase<QBE_AnyFloat, "cge">;
+def QBE_CgtOp : QBE_CompOpBase<QBE_AnyFloat, "cgt">;
+def QBE_CoOp : QBE_CompOpBase<QBE_AnyFloat, "co", [Commutative]>;
+def QBE_CuoOp : QBE_CompOpBase<QBE_AnyFloat, "cuo", [Commutative]>;
+
 #endif // QBE_OPS

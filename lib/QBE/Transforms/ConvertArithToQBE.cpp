@@ -8,6 +8,7 @@
 
 #include "QBE/IR/QBEDialect.h"
 #include "QBE/IR/QBEOps.h"
+#include "QBE/IR/QBETypes.h"
 #include "QBE/Transforms/QBEPasses.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/IR/BuiltinOps.h"
@@ -71,6 +72,109 @@ struct ConstantConversionPattern
     return success();
   }
 };
+
+struct CmpIConversionPattern : public OpConversionPattern<arith::CmpIOp> {
+  using OpConversionPattern::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(arith::CmpIOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    switch (op.getPredicate()) {
+    case arith::CmpIPredicate::eq:
+      rewriter.replaceOpWithNewOp<qbe::CeqOp>(op, adaptor.getOperands());
+      break;
+    case arith::CmpIPredicate::ne:
+      rewriter.replaceOpWithNewOp<qbe::CneOp>(op, adaptor.getOperands());
+      break;
+    case arith::CmpIPredicate::slt:
+      rewriter.replaceOpWithNewOp<qbe::CsltOp>(op, adaptor.getOperands());
+      break;
+    case arith::CmpIPredicate::sle:
+      rewriter.replaceOpWithNewOp<qbe::CsleOp>(op, adaptor.getOperands());
+      break;
+    case arith::CmpIPredicate::sgt:
+      rewriter.replaceOpWithNewOp<qbe::CsgtOp>(op, adaptor.getOperands());
+      break;
+    case arith::CmpIPredicate::sge:
+      rewriter.replaceOpWithNewOp<qbe::CsgeOp>(op, adaptor.getOperands());
+      break;
+    case arith::CmpIPredicate::ult:
+      rewriter.replaceOpWithNewOp<qbe::CultOp>(op, adaptor.getOperands());
+      break;
+    case arith::CmpIPredicate::ule:
+      rewriter.replaceOpWithNewOp<qbe::CuleOp>(op, adaptor.getOperands());
+      break;
+    case arith::CmpIPredicate::ugt:
+      rewriter.replaceOpWithNewOp<qbe::CugtOp>(op, adaptor.getOperands());
+      break;
+    case arith::CmpIPredicate::uge:
+      rewriter.replaceOpWithNewOp<qbe::CugeOp>(op, adaptor.getOperands());
+      break;
+    }
+    return success();
+  }
+};
+
+struct CmpFConversionPattern : public OpConversionPattern<arith::CmpFOp> {
+  using OpConversionPattern::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(arith::CmpFOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    auto pred = op.getPredicate();
+    Value comp;
+    switch (pred) {
+    case arith::CmpFPredicate::AlwaysTrue:
+      rewriter.replaceOpWithNewOp<qbe::ConstantOp>(
+          op, qbe::QBEWordType::get(rewriter.getContext()),
+          rewriter.getI32IntegerAttr(1));
+      return success();
+    case arith::CmpFPredicate::AlwaysFalse:
+      rewriter.replaceOpWithNewOp<qbe::ConstantOp>(
+          op, qbe::QBEWordType::get(rewriter.getContext()),
+          rewriter.getI32IntegerAttr(0));
+      return success();
+    case arith::CmpFPredicate::OEQ:
+    case arith::CmpFPredicate::UEQ:
+      comp = rewriter.create<qbe::CeqOp>(op.getLoc(), adaptor.getOperands());
+      break;
+    case arith::CmpFPredicate::OGT:
+    case arith::CmpFPredicate::UGT:
+      comp = rewriter.create<qbe::CgtOp>(op.getLoc(), adaptor.getOperands());
+      break;
+    case arith::CmpFPredicate::OGE:
+    case arith::CmpFPredicate::UGE:
+      comp = rewriter.create<qbe::CgeOp>(op.getLoc(), adaptor.getOperands());
+      break;
+    case arith::CmpFPredicate::OLT:
+    case arith::CmpFPredicate::ULT:
+      comp = rewriter.create<qbe::CltOp>(op.getLoc(), adaptor.getOperands());
+      break;
+    case arith::CmpFPredicate::OLE:
+    case arith::CmpFPredicate::ULE:
+      comp = rewriter.create<qbe::CleOp>(op.getLoc(), adaptor.getOperands());
+      break;
+    case arith::CmpFPredicate::ONE:
+    case arith::CmpFPredicate::UNE:
+      comp = rewriter.create<qbe::CneOp>(op.getLoc(), adaptor.getOperands());
+      break;
+    case arith::CmpFPredicate::ORD:
+      rewriter.replaceOpWithNewOp<qbe::CoOp>(op, adaptor.getOperands());
+      return success();
+    case arith::CmpFPredicate::UNO:
+      rewriter.replaceOpWithNewOp<qbe::CuoOp>(op, adaptor.getOperands());
+      return success();
+    }
+    if (pred < arith::CmpFPredicate::ORD) {
+      auto ord = rewriter.create<qbe::CoOp>(op.getLoc(), adaptor.getOperands());
+      rewriter.replaceOpWithNewOp<qbe::AndOp>(op, comp, ord);
+    } else {
+      auto uo = rewriter.create<qbe::CuoOp>(op.getLoc(), adaptor.getOperands());
+      rewriter.replaceOpWithNewOp<qbe::OrOp>(op, comp, uo);
+    }
+    return success();
+  }
+};
 } // namespace
 
 struct ConvertArithToQBE
@@ -114,7 +218,9 @@ void populateArithToQBEConversionPatterns(QBETypeConverter &converter,
     ShRSIConversionPattern,
     ShRUIConversionPattern,
     ShLIConversionPattern,
-    ConstantConversionPattern
+    ConstantConversionPattern,
+    CmpIConversionPattern,
+    CmpFConversionPattern
   >(converter, patterns.getContext());
   // clang-format on
 }

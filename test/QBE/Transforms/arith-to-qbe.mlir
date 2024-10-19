@@ -155,3 +155,91 @@ func.func @const() -> (i32, i64, f32, f64) {
   %d = arith.constant 64.0 : f64
   return %a, %b, %c, %d : i32, i64, f32, f64
 }
+
+// -----
+
+func.func @comp_w(%a: i32, %b: i32) {
+  // CHECK: %{{.*}} = qbe.ceq %[[A:.*]], %[[B:.*]] : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cne %[[A]], %[[B]] : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.csle %[[A]], %[[B]] : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cslt %[[A]], %[[B]] : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.csge %[[A]], %[[B]] : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.csgt %[[A]], %[[B]] : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cule %[[A]], %[[B]] : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cult %[[A]], %[[B]] : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cuge %[[A]], %[[B]] : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cugt %[[A]], %[[B]] : !qbe.word
+  %0 = arith.cmpi eq, %a, %b : i32
+  %1 = arith.cmpi ne, %a, %b : i32
+  %2 = arith.cmpi sle, %a, %b : i32
+  %3 = arith.cmpi slt, %a, %b : i32
+  %4 = arith.cmpi sge, %a, %b : i32
+  %5 = arith.cmpi sgt, %a, %b : i32
+  %6 = arith.cmpi ule, %a, %b : i32
+  %7 = arith.cmpi ult, %a, %b : i32
+  %8 = arith.cmpi uge, %a, %b : i32
+  %9 = arith.cmpi ugt, %a, %b : i32
+  return
+}
+
+// -----
+
+func.func @comp_s(%a: f32, %b: f32) {
+  // CHECK: %{{.*}} = qbe.mlir.constant(0 : i32) : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.ceq %[[ARG0:.*]], %[[ARG1:.*]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.co %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.and %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cgt %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.co %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.and %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cge %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.co %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.and %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.clt %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.co %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.and %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cle %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.co %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.and %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cne %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.co %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.and %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.co %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.ceq %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.cuo %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.or %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cgt %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.cuo %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.or %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cge %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.cuo %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.or %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.clt %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.cuo %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.or %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cle %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.cuo %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.or %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cne %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.cuo %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.or %{{.*}}, %{{.*}} : !qbe.word
+  // CHECK-NEXT: %{{.*}} = qbe.cuo %[[ARG0]], %[[ARG1]] : !qbe.single
+  // CHECK-NEXT: %{{.*}} = qbe.mlir.constant(1 : i32) : !qbe.word
+  %0 = arith.cmpf false, %a, %b : f32
+  %1 = arith.cmpf oeq, %a, %b : f32
+  %2 = arith.cmpf ogt, %a, %b : f32
+  %3 = arith.cmpf oge, %a, %b : f32
+  %4 = arith.cmpf olt, %a, %b : f32
+  %5 = arith.cmpf ole, %a, %b : f32
+  %6 = arith.cmpf one, %a, %b : f32
+  %7 = arith.cmpf ord, %a, %b : f32
+  %8 = arith.cmpf ueq, %a, %b : f32
+  %9 = arith.cmpf ugt, %a, %b : f32
+  %10 = arith.cmpf uge, %a, %b : f32
+  %11 = arith.cmpf ult, %a, %b : f32
+  %12 = arith.cmpf ule, %a, %b : f32
+  %13 = arith.cmpf une, %a, %b : f32
+  %14 = arith.cmpf uno, %a, %b : f32
+  %15 = arith.cmpf true, %a, %b : f32
+  return
+}

@@ -297,6 +297,84 @@ static LogicalResult printOperation(Emitter &emitter, NegOp negOp) {
   return success();
 }
 
+template <class T>
+static LogicalResult printCompOperation(Emitter &emitter, T op) {
+  auto &os = emitter.ostream();
+  os << emitter.getOrCreateName(op.getRes()) << " =w "
+     << op->getName().stripDialect();
+  if (failed(emitter.emitType(op.getLoc(), op.getLhs().getType())))
+    return failure();
+  os << " ";
+  emitter.emitSSEOrConstant(op.getLhs());
+  os << ", ";
+  emitter.emitSSEOrConstant(op.getRhs());
+  return success();
+}
+
+static LogicalResult printOperation(Emitter &emitter, CeqOp ceqOp) {
+  return printCompOperation(emitter, ceqOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CneOp cneOp) {
+  return printCompOperation(emitter, cneOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CsleOp csleOp) {
+  return printCompOperation(emitter, csleOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CsltOp csltOp) {
+  return printCompOperation(emitter, csltOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CsgeOp csgeOp) {
+  return printCompOperation(emitter, csgeOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CsgtOp csgtOp) {
+  return printCompOperation(emitter, csgtOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CuleOp culeOp) {
+  return printCompOperation(emitter, culeOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CultOp cultOp) {
+  return printCompOperation(emitter, cultOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CugeOp cugeOp) {
+  return printCompOperation(emitter, cugeOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CugtOp cugtOp) {
+  return printCompOperation(emitter, cugtOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CleOp cleOp) {
+  return printCompOperation(emitter, cleOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CltOp cltOp) {
+  return printCompOperation(emitter, cltOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CgeOp cgeOp) {
+  return printCompOperation(emitter, cgeOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CgtOp cgtOp) {
+  return printCompOperation(emitter, cgtOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CoOp coOp) {
+  return printCompOperation(emitter, coOp);
+}
+
+static LogicalResult printOperation(Emitter &emitter, CuoOp cuoOp) {
+  return printCompOperation(emitter, cuoOp);
+}
+
 StringRef Emitter::getOrCreateName(Value value, StringRef prefix) {
   if (!valueMapper.count(value))
     valueMapper.insert(value, formatv("%{0}{1}", prefix, valueCount++));
@@ -347,7 +425,9 @@ LogicalResult Emitter::emitOperation(Operation &op) {
       llvm::TypeSwitch<Operation *, LogicalResult>(&op)
           .Case<ModuleOp, FuncOp, ReturnOp, AddOp, SubOp, MulOp, DivOp, UDivOp,
                 RemOp, URemOp, OrOp, XorOp, AndOp, SarOp, ShrOp, ShlOp, NegOp,
-                JmpOp, JnzOp, HaltOp>(
+                CeqOp, CneOp, CsleOp, CsltOp, CsgeOp, CsgtOp, CuleOp, CultOp,
+                CugeOp, CugtOp, CleOp, CltOp, CgeOp, CgtOp, CoOp, CuoOp, JmpOp,
+                JnzOp, HaltOp>(
               [&](auto op) { return printOperation(*this, op); })
           .Case<ConstantOp>([](auto) { return success(); })
           .Default([&](Operation *) {
