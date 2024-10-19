@@ -10,6 +10,7 @@
 #include "QBE/IR/QBEOps.h"
 #include "QBE/Transforms/QBEPasses.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/IR/Block.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/PatternMatch.h"
@@ -49,16 +50,11 @@ struct FuncConversionPattern : public OpConversionPattern<func::FuncOp> {
         rewriter.create<qbe::FuncOp>(op.getLoc(), op.getName(), newFuncType);
     rewriter.inlineRegionBefore(op.getBody(), newFuncOp.getBody(),
                                 newFuncOp.end());
-    if (failed(rewriter.convertRegionTypes(&newFuncOp.getBody(), *typeConverter,
-                                           &signatureConverter))) {
-      return failure();
-    }
-
+    rewriter.applySignatureConversion(&newFuncOp.getBody(), signatureConverter,
+                                      converter);
     rewriter.eraseOp(op);
     return success();
   }
-
-protected:
 };
 
 using ReturnConversionPattern =

@@ -14,6 +14,7 @@
 #include "mlir/IR/OperationSupport.h"
 #include "mlir/IR/SymbolTable.h"
 #include "mlir/IR/Types.h"
+#include "mlir/Interfaces/ControlFlowInterfaces.h"
 #include "mlir/Interfaces/FunctionImplementation.h"
 
 #include "QBE/IR/QBEDialect.h"
@@ -146,3 +147,22 @@ LogicalResult ConstantOp::verify() {
 }
 
 OpFoldResult ConstantOp::fold(FoldAdaptor) { return getValue(); }
+
+//===----------------------------------------------------------------------===//
+// JmpOp
+//===----------------------------------------------------------------------===//
+
+SuccessorOperands JmpOp::getSuccessorOperands(unsigned index) {
+  assert(index == 0 && "invalid successor index");
+  return SuccessorOperands(getDestOperandsMutable());
+}
+
+//===----------------------------------------------------------------------===//
+// JnzOp
+//===----------------------------------------------------------------------===//
+
+SuccessorOperands JnzOp::getSuccessorOperands(unsigned index) {
+  assert(index < getNumSuccessors() && "invalid successor index");
+  return SuccessorOperands(index == 0 ? getTrueOperandsMutable()
+                                      : getFalseOperandsMutable());
+}

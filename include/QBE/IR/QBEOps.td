@@ -68,20 +68,21 @@ def QBE_FuncOp : QBE_Op<"func", [
 }
 
 def QBE_JmpOp : QBE_Op<"jmp", [
-  //DeclareOpInterfaceMethods<BranchOpInterface>,
+  DeclareOpInterfaceMethods<BranchOpInterface>,
   Pure, Terminator
 ]> {
   let summary = "QBE dialect unconditional jump.";
   let description = [{
     A terminator operation which jumps unconditionally to target block.
   }];
+  let arguments = (ins Variadic<QBE_AnyNumber>:$destOperands);
   let successors = (successor AnySuccessor:$dest);
-  let assemblyFormat = "$dest attr-dict";
+  let assemblyFormat = "$dest (`(` $destOperands^ `:` type($destOperands) `)`)? attr-dict";
 }
 
 def QBE_JnzOp : QBE_Op<"jnz", [
-  /* AttrSizedOperandSegments,
-  DeclareOpInterfaceMethods<BranchOpInterface>,*/ Pure, Terminator
+  AttrSizedOperandSegments,
+  DeclareOpInterfaceMethods<BranchOpInterface>, Pure, Terminator
 ]> {
   let summary = "QBE dialect conditional jump.";
   let description = [{
@@ -89,9 +90,17 @@ def QBE_JnzOp : QBE_Op<"jnz", [
     When the argument is non-zero, it jumps to the first block.
     Otherwise it jumps to the second block.
   }];
-  let arguments = (ins QBE_WordType:$cond);
+  let arguments = (ins
+    QBE_WordType:$cond,
+    Variadic<QBE_AnyNumber>:$trueOperands,
+    Variadic<QBE_AnyNumber>:$falseOperands
+  );
   let successors = (successor AnySuccessor:$trueDest, AnySuccessor:$falseDest);
-  let assemblyFormat = "$cond `,` $trueDest `,` $falseDest attr-dict";
+  let assemblyFormat = [{
+    $cond `,`
+    $trueDest (`(` $trueOperands^ `:` type($trueOperands) `)`)? `,`
+    $falseDest (`(` $falseOperands^ `:` type($falseOperands) `)`)? attr-dict
+  }];
 }
 
 def QBE_HaltOp : QBE_Op<"hlt", [Terminator]> {

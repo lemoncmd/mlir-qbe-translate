@@ -11,6 +11,7 @@
 #include "QBE/Transforms/QBEPasses.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlow.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Support/LogicalResult.h"
@@ -22,13 +23,31 @@ namespace mlir::qbe {
 #include "QBE/Transforms/QBEPasses.h.inc"
 
 namespace {
+struct FuncConversionPattern : public OpConversionPattern<func::FuncOp> {
+  using OpConversionPattern::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(func::FuncOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    const TypeConverter *converter = getTypeConverter();
+
+    if (failed(rewriter.convertNonEntryRegionTypes(&op.getBody(), *converter,
+                                                   {}))) {
+      return failure();
+    }
+
+    return success();
+  }
+};
+
 struct BranchConversionPattern : public OpConversionPattern<cf::BranchOp> {
   using OpConversionPattern::OpConversionPattern;
 
   LogicalResult
   matchAndRewrite(cf::BranchOp op, OpAdaptor adaptor,
                   ConversionPatternRewriter &rewriter) const override {
-    rewriter.replaceOpWithNewOp<qbe::JmpOp>(op, op.getDest());
+    rewriter.replaceOpWithNewOp<qbe::JmpOp>(op, adaptor.getDestOperands(),
+                                            op.getDest());
     return success();
   }
 };
@@ -41,7 +60,8 @@ struct CondBranchConversionPattern
   matchAndRewrite(cf::CondBranchOp op, OpAdaptor adaptor,
                   ConversionPatternRewriter &rewriter) const override {
     rewriter.replaceOpWithNewOp<qbe::JnzOp>(
-        op, adaptor.getCondition(), op.getTrueDest(), op.getFalseDest());
+        op, adaptor.getCondition(), adaptor.getTrueDestOperands(),
+        adaptor.getFalseDestOperands(), op.getTrueDest(), op.getFalseDest());
     return success();
   }
 };
@@ -70,6 +90,7 @@ void populateControlFlowToQBEConversionPatterns(QBETypeConverter &converter,
                                                 RewritePatternSet &patterns) {
   // clang-format off
   patterns.add<
+    FuncConversionPattern,
     BranchConversionPattern,
     CondBranchConversionPattern
   >(converter, patterns.getContext());

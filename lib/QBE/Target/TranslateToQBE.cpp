@@ -145,6 +145,41 @@ static LogicalResult printOperation(Emitter &emitter, FuncOp funcOp) {
   for (Block &block : blocks) {
     os << emitter.getOrCreateName(block) << "\n";
     os.indent();
+
+    // Emit phis
+    if (!block.hasNoPredecessors()) {
+      for (auto [i, arg] : llvm::enumerate(block.getArguments())) {
+        // Since structured binded variables can't be captured.
+        auto index = i;
+        os << emitter.getOrCreateName(arg) << " =";
+        if (failed(emitter.emitType(funcOp.getLoc(), arg.getType()))) {
+          return failure();
+        }
+        os << " phi ";
+        if (failed(interleaveCommaWithError(
+                block.getPredecessors(), os, [&](Block *pred) {
+                  os << emitter.getOrCreateName(*pred) << " ";
+                  auto *terminator = pred->getTerminator();
+                  if (isa<JmpOp>(terminator)) {
+                    auto op = cast<JmpOp>(terminator);
+                    emitter.emitSSEOrConstant(op.getDestOperands()[index]);
+                  } else if (isa<JnzOp>(terminator)) {
+                    auto op = cast<JnzOp>(terminator);
+                    emitter.emitSSEOrConstant(
+                        (op.getTrueDest() == &block
+                             ? op.getTrueOperands()
+                             : op.getFalseOperands())[index]);
+                  } else {
+                    return failure();
+                  }
+                  return success();
+                }))) {
+          return failure();
+        }
+        os << "\n";
+      }
+    }
+
     for (Operation &op : block.getOperations()) {
       if (failed(emitter.emitOperation(op)))
         return failure();
