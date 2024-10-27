@@ -11,6 +11,7 @@
 
 include "QBE/IR/QBETypes.td"
 include "mlir/IR/BuiltinAttributeInterfaces.td"
+include "mlir/Interfaces/CallInterfaces.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
@@ -65,6 +66,22 @@ def QBE_FuncOp : QBE_Op<"func", [
   let hasCustomAssemblyFormat = 1;
 
   let hasVerifier = 1;
+}
+
+def QBE_CallOp : QBE_Op<"call", [
+  DeclareOpInterfaceMethods<CallOpInterface>,
+  DeclareOpInterfaceMethods<SymbolUserOpInterface>
+]> {
+  let summary = "QBE dialect function call.";
+  let description = [{
+    QBE call op calls a qbe function.
+  }];
+  let arguments = (ins
+    FlatSymbolRefAttr:$callee,
+    Variadic<AnyType>:$operands
+  );
+  let results = (outs Variadic<AnyType>:$results);
+  let assemblyFormat = "$callee `(` $operands `)` attr-dict `:` functional-type($operands, $results)";
 }
 
 def QBE_JmpOp : QBE_Op<"jmp", [

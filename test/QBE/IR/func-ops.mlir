@@ -6,11 +6,23 @@ qbe.func @none() {
   qbe.return
 }
 
+qbe.func @caller() {
+  // CHECK: qbe.call @none() : () -> ()
+  qbe.call @none() : () -> ()
+  qbe.return
+}
+
 // -----
 
 // CHECK: qbe.func @one_operand(%{{.*}}: !qbe.word)
 qbe.func @one_operand(%a: !qbe.word) {
   // CHECK: qbe.return
+  qbe.return
+}
+
+qbe.func @caller(%a: !qbe.word) {
+  // CHECK: qbe.call @one_operand(%{{.*}}) : (!qbe.word) -> ()
+  qbe.call @one_operand(%a) : (!qbe.word) -> ()
   qbe.return
 }
 
@@ -22,12 +34,24 @@ qbe.func @multi_operands(%a: !qbe.word, %b: !qbe.single, %c: !qbe.long) {
   qbe.return
 }
 
+qbe.func @caller(%a: !qbe.word, %b: !qbe.single, %c: !qbe.long) {
+  // CHECK: qbe.call @multi_operands(%{{.*}}, %{{.*}}, %{{.*}}) : (!qbe.word, !qbe.single, !qbe.long) -> ()
+  qbe.call @multi_operands(%a, %b, %c) : (!qbe.word, !qbe.single, !qbe.long) -> ()
+  qbe.return
+}
+
 // -----
 
 // CHECK: qbe.func @ret(%[[VAR:.*]]: !qbe.word)
 qbe.func @ret(%a: !qbe.word) -> !qbe.word {
   // CHECK: qbe.return %[[VAR]] : !qbe.word
   qbe.return %a : !qbe.word
+}
+
+qbe.func @caller(%a: !qbe.word) -> !qbe.word {
+  // CHECK: %{{.*}} = qbe.call @ret(%{{.*}}) : (!qbe.word) -> !qbe.word
+  %b = qbe.call @ret(%a) : (!qbe.word) -> !qbe.word
+  qbe.return %b : !qbe.word
 }
 
 // -----

@@ -191,6 +191,30 @@ static LogicalResult printOperation(Emitter &emitter, FuncOp funcOp) {
   return success();
 }
 
+static LogicalResult printOperation(Emitter &emitter, CallOp callOp) {
+  auto &os = emitter.ostream();
+
+  if (callOp.getNumResults() == 1) {
+    os << emitter.getOrCreateName(callOp.getResult(0)) << " =";
+    if (failed(emitter.emitType(callOp.getLoc(), callOp.getResultTypes()[0])))
+      return failure();
+    os << " ";
+  }
+  os << "call $" << callOp.getCallee() << "(";
+  if (failed(
+          interleaveCommaWithError(callOp.getOperands(), os, [&](Value value) {
+            if (failed(emitter.emitType(callOp.getLoc(), value.getType())))
+              return failure();
+            os << " ";
+            emitter.emitSSEOrConstant(value);
+            return success();
+          }))) {
+    return failure();
+  }
+  os << ")";
+  return success();
+}
+
 static LogicalResult printOperation(Emitter &emitter, JmpOp jmpOp) {
   auto &os = emitter.ostream();
   os << "jmp " << emitter.getOrCreateName(*jmpOp.getDest());
@@ -426,8 +450,8 @@ LogicalResult Emitter::emitOperation(Operation &op) {
           .Case<ModuleOp, FuncOp, ReturnOp, AddOp, SubOp, MulOp, DivOp, UDivOp,
                 RemOp, URemOp, OrOp, XorOp, AndOp, SarOp, ShrOp, ShlOp, NegOp,
                 CeqOp, CneOp, CsleOp, CsltOp, CsgeOp, CsgtOp, CuleOp, CultOp,
-                CugeOp, CugtOp, CleOp, CltOp, CgeOp, CgtOp, CoOp, CuoOp, JmpOp,
-                JnzOp, HaltOp>(
+                CugeOp, CugtOp, CleOp, CltOp, CgeOp, CgtOp, CoOp, CuoOp, CallOp,
+                JmpOp, JnzOp, HaltOp>(
               [&](auto op) { return printOperation(*this, op); })
           .Case<ConstantOp>([](auto) { return success(); })
           .Default([&](Operation *) {

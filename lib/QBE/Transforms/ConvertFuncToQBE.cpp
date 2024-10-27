@@ -57,6 +57,26 @@ struct FuncConversionPattern : public OpConversionPattern<func::FuncOp> {
   }
 };
 
+struct CallConversionPattern : public OpConversionPattern<func::CallOp> {
+  using OpConversionPattern::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(func::CallOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    const TypeConverter *converter = getTypeConverter();
+
+    // TODO: support multiple result types
+    SmallVector<Type, 1> resultType{};
+    if (op.getNumResults() == 1) {
+      resultType.push_back(converter->convertType(op.getResultTypes()[0]));
+    }
+
+    rewriter.replaceOpWithNewOp<qbe::CallOp>(op, resultType, op.getCallee(),
+                                             adaptor.getOperands());
+    return success();
+  }
+};
+
 using ReturnConversionPattern =
     ToQBEConversionPatternBase<func::ReturnOp, qbe::ReturnOp>;
 } // namespace
@@ -84,6 +104,7 @@ void populateFuncToQBEConversionPatterns(QBETypeConverter &converter,
   // clang-format off
   patterns.add<
     FuncConversionPattern,
+    CallConversionPattern,
     ReturnConversionPattern
   >(converter, patterns.getContext());
   // clang-format on
